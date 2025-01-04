@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <h1 class="text-center">NASA SUITS Development Dashboard</h1>
+        <p class="text-center">Columbia University Lunar Lions - EVA Interface Tools</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Vitals Card -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-heartbeat text-danger"></i> Vital Signs Monitor</h5>
+            </div>
+            <div class="card-body">
+                <p>Real-time monitoring of astronaut vital signs and suit telemetry data.</p>
+                <ul>
+                    <li>Heart Rate & Blood Pressure</li>
+                    <li>O2 Saturation</li>
+                    <li>Suit Pressure</li>
+                    <li>Battery Levels</li>
+                </ul>
+                <a href="/vitals" class="btn btn-primary">View Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Card -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-map-marker-alt text-info"></i> Navigation System</h5>
+            </div>
+            <div class="card-body">
+                <p>Interactive 2D map with real-time position tracking and waypoint management.</p>
+                <ul>
+                    <li>Current Position</li>
+                    <li>Waypoint Management</li>
+                    <li>Path Planning</li>
+                    <li>Distance Calculations</li>
+                </ul>
+                <a href="/navigation" class="btn btn-primary">Open Map</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Procedures Card -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-tasks text-warning"></i> Procedure Tracker</h5>
+            </div>
+            <div class="card-body">
+                <p>Interactive checklist system for EVA procedures and tasks.</p>
+                <ul>
+                    <li>Step-by-Step Guides</li>
+                    <li>Progress Tracking</li>
+                    <li>Time Management</li>
+                    <li>Safety Checks</li>
+                </ul>
+                <a href="/procedures" class="btn btn-primary">View Procedures</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Geology Card -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-microscope text-success"></i> Geology Tools</h5>
+            </div>
+            <div class="card-body">
+                <p>XRF data visualization and sample management system.</p>
+                <ul>
+                    <li>Sample Analysis</li>
+                    <li>Data Visualization</li>
+                    <li>Collection Records</li>
+                    <li>Look ODD Process</li>
+                </ul>
+                <a href="/geology" class="btn btn-primary">Open Tools</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts Card -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle text-danger"></i> Alert System</h5>
+            </div>
+            <div class="card-body">
+                <p>Real-time monitoring and alert system for critical parameters.</p>
+                <ul>
+                    <li>System Warnings</li>
+                    <li>Critical Alerts</li>
+                    <li>Status Updates</li>
+                    <li>Emergency Procedures</li>
+                </ul>
+                <a href="/alerts" class="btn btn-primary">View Alerts</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline Card -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-clock text-primary"></i> Mission Timeline</h5>
+            </div>
+            <div class="card-body">
+                <p>Mission time tracking and schedule management system.</p>
+                <ul>
+                    <li>Mission Clock</li>
+                    <li>Task Duration</li>
+                    <li>Schedule Updates</li>
+                    <li>Timeline Management</li>
+                </ul>
+                <a href="/timeline" class="btn btn-primary">View Timeline</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

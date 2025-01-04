@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .vital-card {
+        transition: all 0.3s ease;
+    }
+    
+    .vital-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .vital-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+    
+    .vital-unit {
+        font-size: 1rem;
+        color: #888;
+    }
+    
+    .warning {
+        background-color: rgba(255, 193, 7, 0.2);
+    }
+    
+    .critical {
+        background-color: rgba(220, 53, 69, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-heartbeat text-danger"></i> EVA Suit Vitals Monitor</h2>
+        <p>Real-time monitoring of astronaut vital signs and suit telemetry</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Heart Rate -->
+    <div class="col-md-4">
+        <div class="card vital-card" id="heart-rate-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-heart text-danger"></i> Heart Rate</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="vital-value" id="heart-rate">--</div>
+                <div class="vital-unit">BPM</div>
+                <canvas id="heart-rate-chart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blood Pressure -->
+    <div class="col-md-4">
+        <div class="card vital-card" id="blood-pressure-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-tachometer-alt text-info"></i> Blood Pressure</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="vital-value" id="blood-pressure">--/--</div>
+                <div class="vital-unit">mmHg</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- O2 Saturation -->
+    <div class="col-md-4">
+        <div class="card vital-card" id="o2-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-lungs text-primary"></i> O2 Saturation</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="vital-value" id="o2-saturation">--</div>
+                <div class="vital-unit">%</div>
+                <canvas id="o2-chart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suit Pressure -->
+    <div class="col-md-4">
+        <div class="card vital-card" id="pressure-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-compress-alt text-warning"></i> Suit Pressure</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="vital-value" id="suit-pressure">--</div>
+                <div class="vital-unit">PSI</div>
+                <canvas id="pressure-chart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Battery Level -->
+    <div class="col-md-4">
+        <div class="card vital-card" id="battery-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-battery-three-quarters text-success"></i> Battery Level</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="vital-value" id="battery-level">--</div>
+                <div class="vital-unit">%</div>
+                <div class="progress mt-3">
+                    <div class="progress-bar bg-success" id="battery-progress" role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CO2 Level -->
+    <div class="col-md-4">
+        <div class="card vital-card" id="co2-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-wind text-danger"></i> CO2 Level</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="vital-value" id="co2-level">--</div>
+                <div class="vital-unit">mmHg</div>
+                <canvas id="co2-chart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Initialize charts
+    const chartConfig = {
+        type: 'line',
+        data: {
+            labels: Array(20).fill(''),
+            datasets: [{
+                data: Array(20).fill(null),
+                borderColor: '#105bd8',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { display: false },
+                y: { display: false }
+            },
+            animation: false
+        }
+    };
+
+    const charts = {
+        heartRate: new Chart(document.getElementById('heart-rate-chart'), {...chartConfig}),
+        o2: new Chart(document.getElementById('o2-chart'), {...chartConfig}),
+        pressure: new Chart(document.getElementById('pressure-chart'), {...chartConfig}),
+        co2: new Chart(document.getElementById('co2-chart'), {...chartConfig})
+    };
+
+    // Update function for charts
+    function updateChart(chart, value) {
+        chart.data.datasets[0].data.push(value);
+        chart.data.datasets[0].data.shift();
+        chart.update();
+    }
+
+    // Socket.IO updates
+    socket.on('vitals_update', (data) => {
+        // Update values
+        document.getElementById('heart-rate').textContent = data.heart_rate;
+        document.getElementById('blood-pressure').textContent = data.blood_pressure;
+        document.getElementById('o2-saturation').textContent = data.o2_saturation;
+        document.getElementById('suit-pressure').textContent = data.suit_pressure;
+        document.getElementById('battery-level').textContent = data.battery_level;
+        document.getElementById('co2-level').textContent = data.co2_level;
+
+        // Update battery progress bar
+        document.getElementById('battery-progress').style.width = `${data.battery_level}%`;
+
+        // Update charts
+        updateChart(charts.heartRate, data.heart_rate);
+        updateChart(charts.o2, data.o2_saturation);
+        updateChart(charts.pressure, data.suit_pressure);
+        updateChart(charts.co2, data.co2_level);
+
+        // Check for warnings
+        const cards = {
+            'heart-rate-card': data.heart_rate < 60 || data.heart_rate > 100,
+            'blood-pressure-card': false, // Add your own logic
+            'o2-card': data.o2_saturation < 95,
+            'pressure-card': data.suit_pressure < 3.8 || data.suit_pressure > 4.2,
+            'battery-card': data.battery_level < 20,
+            'co2-card': data.co2_level > 3
+        };
+
+        // Apply warning classes
+        for (const [id, warning] of Object.entries(cards)) {
+            const card = document.getElementById(id);
+            card.classList.toggle('warning', warning);
+            card.classList.toggle('critical', warning && (
+                data.battery_level < 10 ||
+                data.o2_saturation < 90 ||
+                data.co2_level > 5
+            ));
+        }
+    });
+
+    // Request initial data
+    fetch('/api/vitals')
+        .then(response => response.json())
+        .then(data => socket.emit('vitals_update', data));
+
+    // Poll for updates every second (simulating real-time updates)
+    setInterval(() => {
+        fetch('/api/vitals')
+            .then(response => response.json())
+            .then(data => socket.emit('vitals_update', data));
+    }, 1000);
+</script>
+{% endblock %} 

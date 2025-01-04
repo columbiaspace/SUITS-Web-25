@@ -1,0 +1,526 @@
+# MISSION DESCRIPTION
+
+## NASA Spacesuit User Interface Technologies for Students
+
+## (SUITS) Software Design Challenge
+
+## 202 4-
+
+
+## Contents
+
+- 1. Background
+- 2. Mission Concept
+   - 2a. Pressurized Rover
+   - 2b. Spacesuit
+   - 2c. Mission Tasks
+      - Rover Navigation
+      - Egress
+      - EV Navigation
+      - Geologic Sampling
+      - Ingress
+- 3. NASA Provided Systems and Equipment
+   - 3a. TSS
+   - 3b. UIA
+   - 3c. Spectrometer.......................................................................................................................................
+   - 3d. Lunar Terrain Vehicle
+   - 3e. Display and Control Unit
+- 4. Requirements
+   - 4a. Pressurized Rover Requirements
+   - 4b. Spacesuit Display Requirements
+   - 4c. Interoperability Requirements
+   - 4d. Peripheral Requirements
+- Appendix A: Sample UIA Procedures
+- Appendix B: Geology — The Look ODD Process
+
+
+## 1. Background
+
+```
+NASA SUITS (Spacesuit User Interface
+Technologies for Students) is a
+software design challenge in which
+college students from across the
+country help design solutions for
+future spaceflight needs. NASA’s
+Artemis missions seek to land the first
+woman and first person of color on
+the Moon, as well as build towards a
+sustained human presence on the
+Moon and, ultimately, Mars. This
+means engineers are actively developing technologies needed to assure successful completion of
+science and exploration missions. Created as a collaboration between the Extravehicular Activity and
+Human Surface Mobility Program (EHP) and the Office of STEM Engagement, NASA SUITS is entering its
+eighth year of connecting students to authentic engineering challenges.
+```
+```
+A sustained human presence on the lunar surface will require us to reimagine how spacewalks are
+conducted. This includes digital information in the form of displays and interoperability between
+spacesuits and rovers. NASA will also need to use artificial intelligence and edge computing to reach our
+full exploration potential.
+```
+```
+In NASA SUITS, we expect teams to design a crew autonomy enabling system and user interface (UI).
+Teams will submit a proposal for both spacesuit and pressurized rover (PR) systems and displays. If
+selected, we will assign teams one of the two assets to focus on. We will then match these teams with
+other teams to demonstrate the interoperability of the lunar assets. Teams may design their spacesuit
+display with their choice of device, however, any HMDs (head-mounted displays) for the spacesuit must
+be passthrough augmented reality. The pressurized rover is virtual and operates in a virtual
+environment, integrating NASA’s Digital Lunar Exploration Sites Unreal Simulation Tool (DUST).
+```
+```
+Student teams who submit the top proposals will be selected to develop an interface and background
+software, be mentored by NASA experts, and test their devices in a mock EVA (extravehicular activity)
+scenario at NASA’s Johnson Space Center in Houston, in May 2025, where they will showcase their work
+to NASA engineers.
+```
+
+## 2. Mission Concept
+
+```
+NASA SUITS is creating a lunar EVA
+scenario for 2025. Teams are
+responsible for their UI, display
+device, and background software.
+Testing will take place after dark at
+the JSC Rock Yard. Therefore, teams
+will need to accommodate for
+lighting factors in the display
+systems, especially if they use an
+HMD. The rockyard consists of a
+pulverized granite base with scoria
+boulders up to 1m and craters up to
+2m deep and 20m in diameter.
+```
+```
+The scenario takes place with two teams participating at a time, with each assigned to either the
+pressurized rover or the spacesuit components. Each team will have their own design objectives but will
+need to work together throughout the challenge to meet interoperability goals.
+```
+```
+Each team will be connected to a telemetry stream specific to their assigned lunar asset. Teams will
+need to coordinate with their partnered team to develop an interoperability system, independent of the
+assigned telemetry, which enables the sharing of information and data with each other.
+```
+### 2a. Pressurized Rover
+
+```
+The Pressurized Rover team will need to develop a display and control system for the rover operating in
+the virtual DUST environment. We are specifically looking for the teams to use autonomous systems as
+they navigate the rover from one location to another.
+```
+### 2b. Spacesuit
+
+```
+The spacesuit team will need to deploy their solution for two EVA crewmembers. This solution can be
+two of the same device or two different devices. For example, two HMDs, two tablets, or one of each. If
+this will create an undue burden on a team, we can work with them post-selection on an alternative
+solution. The EVA crewmembers will be referred to as “EV,” or “EV1” and “EV2” if differentiated.
+```
+### 2c. Mission Tasks
+
+#### Rover Navigation
+
+```
+The scenario begins with the PR team demonstrating their display and crew autonomy system as they
+navigate the rover from a starting location to the designated worksite(s).
+```
+```
+PR features evaluated at this point include autonomous best path planning, hazard avoidance,
+consumable resource usage, and estimates of remaining resources when the destination is reached.
+Additionally, teams should provide estimates of turn around points at which the rover will need to
+```
+
+return to base or risk depletion of limited resources. When provided with a point of interest, teams
+should use predictive modeling to provide a decision support system for crew to optimize resource
+usage and reduce cognitive load.
+
+At a certain point, the team will receive notification that a simulated Lunar Terrain Vehicle has identified
+an area of geologic interest. The PR team will then navigate to that location.
+
+Upon arrival, the crewmembers will prepare for egress. The Umbilical Interface Assembly (UIA) will be
+part of the airlock in the PR. Therefore, the consumables used to prepare the spacesuit will be taken
+from the PR’s resources and should be taken into consideration.
+
+The crewmember in the PR will also support the EVs as they proceed through the rest of the scenario.
+
+Please reference the requirements section for more detailed PR system implementation requirements.
+
+#### Egress
+
+Egress occurs when the crewmembers exit the airlock to begin
+the EVA. Several steps must take place inside the airlock to
+ensure the crewmember can safely egress.
+
+The goal of this task is to demonstrate effective and efficient
+methods for completing the UIA procedures used to initiate an
+EVA by preparing and checking the spacesuit’s portable life
+support systems.
+
+The EV will use information from their display to complete
+procedures for the UIA. The EV will interface with tactile switches
+on the UIA in accordance with provided procedures. Upon
+successful completion of the egress task, the EV will move on to
+the navigation portion of the EVA.
+
+Teams decide the most effective method for communicating and accomplishing these procedures. This
+can be a text checklist, computer vision, voice commands, a combination, or none of those listed. The
+UIA’s switch state will be provided by the PR’s Telemetry Stream Server (TSS) which should be accessible
+to the EV via interoperability. A sample of procedures is in Appendix A but is subject to change as we
+approach test week.
+
+
+#### EV Navigation
+
+The purpose of EV navigation is to ensure
+the crewmember(s) can traverse between
+stations safely and efficiently. The goal is to
+implement a software system for tracking
+crew and scientific assets in the field, as
+well as aid crew members as they navigate
+the lunar surface. This includes a system for
+detecting and navigating environmental
+hazards under lighting conditions like what
+you might experience at the lunar south
+pole. An animation of sample lighting conditions is available here. The system should provide real-time
+alerts and recommend immediate actions such as alternate routes.
+
+Upon completion of each task, the EV will walk from their current station to the next designated station.
+The EV will use information provided in their display to physically navigate between these stations.
+
+Teams will design a navigation solution that is effective and non-obtrusive. This navigation solution
+needs to allow for flexibility in the EVA as destinations can change. For the UI, teams shall design a 2D
+mini-map navigation aid. Teams may also include a 3D map, computer vision destination waypoints,
+and/or path indicators.
+
+Throughout all aspects of the EVA, the crewmember should be able to use interoperability features with
+the PR.
+
+#### Geologic Sampling
+
+The UIs will also help meet science objectives. Teams will achieve this by collecting samples with both
+human and robotic assets. The goal of this task is to demonstrate how your system can increase
+crewmember efficiency and reduce cognitive load.
+
+The EV will use a simulated XRF (X-ray Fluorescence) spectroscopy sensor to scan the chemical make-up
+of rock samples for potential collection. The EV will scan several samples and perform collection tasks of
+desired samples.
+
+This mock XRF sensor uses RFID (radio frequency identification) of selected samples sent to the TSS,
+which then sends XRF data to the user. Teams should access and display this data as they see fit. We
+recommend researching field geology techniques and integrating them into the concept and data
+collection model. Teams may choose to use The Look ODD Process. Interoperability would allow the PR
+to view data as it is collected.
+
+#### Ingress
+
+An EVA is not complete until the crewmember has arrived safely back inside their spacecraft or habitat.
+Ingress is the process of returning to the airlock. Once the crewmember has completed all EVA tasks,
+they will begin the ingress portion of the EVA.
+
+
+```
+Upon completion of the final task of the EVA, the EV will begin ingress. The EV will follow navigation
+cues and instructions to follow the best path for return to the airlock. The EV will conduct final
+procedures with UIA when they arrive to the airlock.
+```
+```
+Teams will decide the most effective method for navigating back to the airlock. The UI shall provide a
+“breadcrumbs” feature for retracing a path. The ideal implementation would provide the shortest, safe
+path back to the airlock.
+```
+## 3. NASA Provided Systems and Equipment
+
+### 3a. TSS
+
+```
+The TSS is a server that provides simulated telemetry values for each of the lunar assets. This stream is
+divided into two feeds, and each team will have access to a specific feed, as detailed in the table below.
+To achieve interoperability goals, teams will need to coordinate the transfer of telemetry across assets.
+```
+```
+NASA will provide a Unity/Unreal plugin to assist in integrating the TSS with your project. Your device
+must be able to retrieve the following information from the TSS and display it at any time:
+```
+```
+Telemetry feed to Pressurized Rover Telemetry feed to EV/Spacesuit
+```
+- Pressurized Rover telemetry
+- Lunar Terrain Vehicle telemetry
+- UIA
+    - Spacesuit telemetry
+    - XRF Spectrometer
+    - Display Control Unit (DCU)
+
+### 3b. UIA
+
+```
+The UIA features multiple switches that teams will manipulate to match the desired configuration for
+egress. These switches feed into the telemetry stream via Booleans, allowing teams to receive real-time
+feedback on their position. We encourage teams to explore creative solutions to display procedures,
+computer vision, and telemetry representation to assist in completing the procedures. UIA telemetry
+will be provided to the PR, which will in turn share the data with the spacesuit via interoperability built
+by the teams.
+```
+### 3c. Spectrometer.......................................................................................................................................
+
+```
+NASA provides the simulated XRF spectrometer, which selects
+simulated geological data from a database when a rock with an RFID
+tag is scanned. The geological data is then sent via the telemetry
+stream back to the user. The team will display the geological data of
+each rock as part of their geology sampling procedures and data
+collection. XRF telemetry will be provided to the spacesuit, which will
+in turn share the data with PR via interoperability built by the teams.
+```
+
+### 3d. Lunar Terrain Vehicle
+
+```
+NASA will provide the Lunar Terrain Vehicle (LTV) and framework for the LTV to move through the
+terrain of the test site. The team is responsible for receiving and displaying telemetry from the PR TSS
+for the LTV.
+```
+### 3e. Display and Control Unit
+
+```
+The Display and Control Unit (DCU) features multiple switches which allow the EV to interact with
+different systems of the space suit. These switches feed into the telemetry stream, allowing teams to
+receive real-time feedback on their position. The DCU also allows the EV to handle any errors related to
+these systems. The version provided does not have an integrated display, rather your spacesuit display
+will handle this information via the TSS.
+```
+```
+The systems controlled by the DCU include:
+```
+- Battery (Local/UMB)
+- Oxygen (Pri/Sec)
+- Comms (A/B)
+    - Fan (Pri/Sec)
+    - Pump (Open/Close)
+    - CO2 (A/B)
+
+```
+The DCU contains a Raspberry Pi with a positioning system. The team is responsible for displaying the
+information given to them via the telemetry stream. NASA will provide a method for simulating the DCU
+location system to assist with the teams’ development.
+```
+## 4. Requirements
+
+```
+Please read and follow the requirements thoroughly. These requirements may evolve following team
+selection.
+Note : In the requirements sections below:
+Shall = required for minimally viable product
+Should = requested features, but secondary priority
+May = potential stretch goals for development
+```
+### 4a. Pressurized Rover Requirements
+
+1. Pressurized Rover control:
+    a) Shall develop system for controlling the rover in the virtual DUST environment.
+2. Spacesuit Telemetry:
+    a) The UI shall display crewmember biomedical data. This data shall be easily accessible.
+    b) The UI shall display spacesuit system state data. This data shall be easily accessible.
+    c) The UI should display crewmember camera feed.
+    Note: this data will come from your partnered team as part of the interoperability requirements.
+3. LTV Telemetry:
+    a) The UI shall display the LTV native camera feed.
+    b) The UI shall display the LTV telemetry. This data shall be easily accessible.
+4. Task Procedures:
+    a) The UI shall display procedures for tasks. All procedures shall be easily accessible.
+5. Scientific Data:
+
+
+```
+a) The UI shall display XRF sensor data when the data has been collected by the EV in the field.
+b) Teams may store this data for recall.
+```
+6. Map:
+    a) The PR UI shall include a live 2D map for tracking human and scientific assets.
+    b) Spacesuit location:
+       i) The map shall track crewmembers’ locations live for the duration of the EVA.
+       ii) The map may draw the EV’s projected and traversed path.
+    c) LTV Location:
+       i) The map shall track the LTV’s location for the duration of the EVA.
+       ii) The map may draw the LTV’s projected and traversed path.
+    d) Points of interest:
+       i) The map shall display all designated points of interest.
+       ii) The map shall update to show any added points of interest by the EV or PR.
+       iii) The map shall allow the user to add points of interest and share with EV.
+    e) Pins:
+       i) Shall implement feature for dropping pins on map.
+       ii) Dropped pins shall sync across interfaces (PR, EV).
+       iii) Pin labels should be customizable.
+    f) Caution and Warning:
+       i) The UI shall feature a caution and warning system.
+       ii) The caution and warning system shall alert PR when any telemetry enter off-nominal
+          ranges.
+    g) Display Mission Timers:
+       i) The UI shall display the mission elapsed time.
+       ii) The UI shall display the elapsed time at each station throughout the EVA.
+       iii) All mission timers shall adhere to standards and constraints provided to selected teams.
+7. Autonomous Navigation System:
+    a) Shall determine best path.
+    b) Shall detect and avoid obstacles.
+    c) Shall receive updated destinations from TSS and other team (EV).
+    d) Shall provide map showing all lunar assets.
+    e) Shall track rover speed, angle, and heading.
+8. Autonomous Resource utilization:
+    a) Shall track life support systems and their health.
+    b) Shall track rover resource such as power use and provide predictive analytics throughout the
+       EVA.
+    c) Shall provide real time updates as necessary through caution and warning system.
+
+### 4b. Spacesuit Display Requirements
+
+1. EV Telemetry:
+    a. The UI shall display EV’s own suit and biomedical data.
+    b. The UI shall display accompanied EV’s suit and biomedical data.
+2. Map:
+    a. The UI shall display a 2-d imensional map.
+    b. The map shall display points of interest.
+    c. The map shall display location of live assets and other crew members.
+
+
+```
+d. The UI may display 3D map of the environment.
+```
+3. Procedure list:
+    a. The UI shall display correct procedures for each station of the EVA.
+4. Navigation:
+    a. The UI shall implement a “breadcrumb” feature for navigational use.
+       i. This feature will allow the user to backtrack to the airlock.
+    b. The UI should implement a best path navigation feature.
+    c. The UI may offer navigation aids to points of interest.
+    d. The UI shall provide predictive maximum range based upon spacesuit life support usage and
+       limitations.
+5. Drop Pins:
+    a. The design shall provide the user the ability to drop a pin on the map at any point during the
+       EVA.
+6. Caution and Warning:
+    a. The UI shall feature a caution and warning system.
+    b. The caution and warning system shall alert the user if his/her spacesuit or biometric telemetry
+       enter off-nominal ranges.
+    c. The caution and warning system shall alert the user if accompanied EV’s suit or biometric
+       telemetry enter off-nominal ranges.
+    d. The UI may feature a digital switching solution for the DCU.
+7. Scientific Data Reporting:
+    a. The UI shall alert the user when a sample is scanned.
+    b. The UI shall alert the user when the sample is being analyzed.
+    c. The UI should display spectroscopy analysis to the user when the sample is scanned.
+    d. The UI shall alert the user when the analysis is complete.
+    e. The UI shall alert the user when he/she may proceed to next scan.
+    f. The UI may include fields for the user to complete as part of a field geology collection process.
+
+### 4c. Interoperability Requirements
+
+1. Shall share telemetry between both assets.
+2. Shall provide caution warnings across both assets.
+3. Waypoints, asset location, and POIs.
+4. Scientific Data Reporting.
+5. Camera stream from EV to PR display.
+
+### 4d. Peripheral Requirements
+
+```
+These requirements shall apply to the development of peripheral device.
+```
+1. Any external or additional device must be presented at the software design review (SDR) and
+    approved by the NASA SUITS team.
+2. The device should communicate with teams’ device(s) outside of the TSS, (i.e., Bluetooth).
+3. Any removable components shall have a tether attachment point.
+4. Devices must not have holes or openings which would allow/cause entrapment of fingers.
+
+
+5. There shall be no sharp edges on the device.
+6. Pinch points should be minimized and labeled.
+7. Electrical design must meet the additional requirements.
+
+
+## Appendix A: Sample UIA Procedures
+
+#### EVA Eg r e s s
+
+#### Connect UIA to DCU and start Depress
+
+#### U IA a n d D C U 1. EV1 and EV2 connect UIA and DCU umbilical
+
+#### UIA 2. EV-1 , EV-2 P WR – ON
+
+#### BO TH D C U 3. BATT – UMB
+
+#### UIA 4. DEPRESS PUMP PWR – ON
+
+#### Prep O2 Tanks
+
+#### UIA 1. OXYGEN O2 VENT – OP EN
+
+#### H MD 2. Wait until both Primary and Secondary OXY tanks are < 10psi
+
+#### UIA 3. OXYGEN O2 VENT – C LO S E
+
+#### BO TH D C U 4. O XY – P RI
+
+#### UIA 5. OXYGEN EMU-1, EMU-2 – OP EN
+
+#### H MD 6. Wait until EV1 and EV2 Primary O2 tanks > 3000 psi
+
+#### UIA 7. OXYGEN EMU-1 , EMU-2 – C LO S E
+
+#### BO TH D C U 8. O XY – SEC
+
+#### UIA 9. OXYGEN EMU-1 , EMU-2 – OP EN
+
+#### H MD 10. Wait until EV1 and EV2 Secondary O2 tanks > 3000 psi
+
+#### UIA 11. OXYGEN EMU-1 , EMU-2 – C LO S E
+
+#### BO TH D C U 12. O XY – P RI
+
+#### Prep Water Tanks
+
+#### BO TH D C U 1. PUMP – OP EN
+
+#### UIA 2. EV-1 , EV-2 W AS TE W ATE R – OP EN
+
+#### H MD 3. Wait until water EV1 and EV2 Coolant tank is < 5%
+
+#### UIA 4. EV-1 , EV-2 W AS TE W ATE R – C LO S E
+
+#### UIA 5. EV-1 , EV-2 SUPPLY WATER – OP EN
+
+#### H MD 6. Wait until water EV1 and EV2 Coolant tank is > 95%
+
+#### UIA 7. EV-1 , EV-2 SUPPLY WATER – C LO S E
+
+#### BO TH D C U 8. PUMP – C LO S E
+
+#### END Depress, Check Switches and Disconnect
+
+#### H MD 1. Wait u n t il SUIT P, O2 P = 4
+
+#### UIA 2. DEPRESS PUMP PWR – OFF
+
+#### BO TH D C U 3. BATT – LO C AL
+
+#### UIA 4. EV-1 , EV-2 P WR - OFF
+
+#### BO TH D C U 5. Ve r i f y O XY – P RI
+
+#### BO TH D C U 6. Ve r ify C O MMS – A
+
+#### BO TH D C U 7. Ve r i f y F AN – P RI
+
+#### BO TH D C U 8. Verify PUMP – C LO S E
+
+#### BO TH D C U 9. Ve r i f y C O 2 – A
+
+#### U IA a n d D C U 10. EV1 and EV2 disconnect UIA and DCU umbilical
+
+
+## Appendix B: Geology — The Look ODD Process
+
+The following cue cards may be used to inspire your geologic sampling process.
+
+
