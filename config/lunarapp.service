@@ -4,9 +4,10 @@ After=network.target
 
 [Service]
 User=ubuntu
-WorkingDirectory=/home/ubuntu/LunarLionsWeb
-Environment="PATH=/home/ubuntu/LunarLionsWeb/venv/bin"
-ExecStart=/home/ubuntu/LunarLionsWeb/venv/bin/gunicorn --config config/gunicorn.conf.py wsgi:app
+Group=www-data
+WorkingDirectory=/home/ubuntu/flaskapp
+Environment="PATH=/home/ubuntu/flaskapp/venv/bin"
+ExecStart=/home/ubuntu/flaskapp/venv/bin/gunicorn --workers 3 --bind unix:app.sock app:app
 
 [Install]
 WantedBy=multi-user.target
