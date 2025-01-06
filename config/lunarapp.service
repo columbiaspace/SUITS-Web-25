@@ -1,0 +1,12 @@
+[Unit]
+Description=Gunicorn instance for Lunar Lions
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/LunarLionsWeb
+Environment="PATH=/home/ubuntu/LunarLionsWeb/venv/bin"
+ExecStart=/home/ubuntu/LunarLionsWeb/venv/bin/gunicorn --config config/gunicorn.conf.py wsgi:app
+
+[Install]
+WantedBy=multi-user.target

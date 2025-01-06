@@ -73,4 +73,7 @@ def handle_disconnect():
     print('Client disconnected')
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True) 
+    socketio.run(app, 
+                    host='0.0.0.0',  # Listen on all interfaces
+                    port=5000,       # Specify port
+                    debug=False)     # Disable debug mode in production 
