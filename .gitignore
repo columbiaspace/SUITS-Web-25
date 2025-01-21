@@ -1,4 +1,6 @@
-"ec2 stuff (not working)"/*.*
+#misc 
+requirements.in
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
