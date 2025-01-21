@@ -1,3 +1,4 @@
+"ec2 stuff (not working)"/*.*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -168,4 +169,78 @@ cython_debug/
 #.idea/
 
 # PyPI configuration file
+.pypirc
+
+# Virtual Environment
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
+*.log
+gunicorn-*.log
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Security
+*.pem
+*.key
+*.crt
+*.cert
+*.p12
+
+# Local Development
+instance/
+.webassets-cache
+
+# Testing and Coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Documentation
+docs/_build/
+/site
+
+# Type Checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# Flask
+instance/
+.webassets-cache
+
+# Nginx
+*.conf
+
+# Service Files
+*.service
+
+# Socket Files
+*.sock
+
+# PyPI
 .pypirc
