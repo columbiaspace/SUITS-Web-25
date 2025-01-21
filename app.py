@@ -82,5 +82,5 @@ if __name__ == '__main__':
     discord_logger.test_connection()
     socketio.run(app, 
                     host='0.0.0.0',  # Listen on all interfaces
-                    port=5000,       # Specify port
-                    debug=False)     # Disable debug mode in production 
+                    port=80,       # Specify port
+                    )     # Disable debug mode in production 
