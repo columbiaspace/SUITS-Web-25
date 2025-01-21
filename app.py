@@ -3,9 +3,11 @@ from flask_socketio import SocketIO
 import json
 import random
 from datetime import datetime
+from utils.discord_logger import DiscordLogger
 
 app = Flask(__name__)
 socketio = SocketIO(app)
+discord_logger = DiscordLogger()
 
 # Mock data generators
 def generate_mock_vitals():
@@ -28,10 +30,12 @@ def generate_mock_location():
 # Routes
 @app.route('/')
 def index():
+    discord_logger.send_log('New client connected')
     return render_template('index.html')
 
 @app.route('/vitals')
 def vitals():
+    discord_logger.send_log('Vitals page accessed')
     return render_template('vitals.html')
 
 @app.route('/navigation')
@@ -67,12 +71,15 @@ def get_location():
 @socketio.on('connect')
 def handle_connect():
     print('Client connected')
+    discord_logger.send_log('New client connected')
 
 @socketio.on('disconnect')
 def handle_disconnect():
     print('Client disconnected')
+    discord_logger.send_log('Client disconnected')
 
 if __name__ == '__main__':
+    discord_logger.test_connection()
     socketio.run(app, 
                     host='0.0.0.0',  # Listen on all interfaces
                     port=5000,       # Specify port
