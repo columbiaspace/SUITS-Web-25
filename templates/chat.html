@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunar Lions Chat</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .chat-container {
+            max-width: 800px;
+            margin: 20px auto;
+            display: none;
+        }
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+        }
+        #chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background-color: #e3f2fd;
+            margin-left: 20%;
+        }
+        .ai-message {
+            background-color: #f5f5f5;
+            margin-right: 20%;
+        }
+        .model-select {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="login-section">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">Login to Chat</h3>
+                <form id="login-form">
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-container" id="chat-section">
+        <h2 class="text-center mb-4">Lunar Lions AI Chat</h2>
+        <div class="model-select">
+            <label for="model-selector" class="form-label">Select AI Model:</label>
+            <select class="form-select" id="model-selector">
+                <option value="gpt-4o">GPT 4o (Default)</option>
+                <option value="o1-preview">o1 Preview</option>
+                <option value="o1-mini">o1 Mini</option>
+                <option value="sonar-pro">Sonar Pro</option>
+                <option value="sonar">Sonar</option>
+            </select>
+        </div>
+        <div id="chat-messages"></div>
+        <form id="chat-form">
+            <div class="input-group">
+                <input type="text" id="message-input" class="form-control" placeholder="Type your message...">
+                <button type="submit" class="btn btn-primary">Send</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const socket = io();
+        const loginForm = document.getElementById('login-form');
+        const loginSection = document.getElementById('login-section');
+        const chatSection = document.getElementById('chat-section');
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+        const chatMessages = document.getElementById('chat-messages');
+        const modelSelector = document.getElementById('model-selector');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            
+            const response = await fetch('/verify-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ password })
+            });
+
+            if (response.ok) {
+                loginSection.style.display = 'none';
+                chatSection.style.display = 'block';
+            } else {
+                alert('Incorrect password');
+            }
+        });
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (message) {
+                appendMessage('user', message);
+                socket.emit('chat_message', {
+                    message: message,
+                    model: modelSelector.value
+                });
+                messageInput.value = '';
+            }
+        });
+
+        socket.on('ai_response', (response) => {
+            appendMessage('ai', response);
+        });
+
+        function appendMessage(sender, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            messageDiv.textContent = content;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html> 

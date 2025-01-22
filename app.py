@@ -1,13 +1,17 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from flask_socketio import SocketIO
 import json
 import random
 from datetime import datetime
 from utils.discord_logger import DiscordLogger
+from utils.llm_utils import get_llm_completion
+from dotenv import load_dotenv
+import os
 
 app = Flask(__name__)
 socketio = SocketIO(app)
 discord_logger = DiscordLogger()
+load_dotenv()
 
 # Mock data generators
 def generate_mock_vitals():
@@ -32,6 +36,17 @@ def generate_mock_location():
 def index():
     discord_logger.send_log('New client connected')
     return render_template('index.html')
+
+@app.route('/chat')
+def chat():
+    return render_template('chat.html')
+
+@app.route('/verify-password', methods=['POST'])
+def verify_password():
+    data = request.get_json()
+    if data.get('password') == os.getenv('CHAT_PASSWORD'):
+        return jsonify({'success': True}), 200
+    return jsonify({'success': False}), 401
 
 @app.route('/vitals')
 def vitals():
@@ -77,6 +92,16 @@ def handle_connect():
 def handle_disconnect():
     print('Client disconnected')
     discord_logger.send_log('Client disconnected')
+
+@socketio.on('chat_message')
+def handle_chat_message(data):
+    message = data['message']
+    model = data.get('model', 'gpt-4o')  # Default to gpt-4o if no model specified
+    success, response = get_llm_completion(message, model=model)
+    if success:
+        socketio.emit('ai_response', response)
+    else:
+        socketio.emit('ai_response', "Sorry, I encountered an error processing your request.")
 
 if __name__ == '__main__':
     discord_logger.test_connection()
