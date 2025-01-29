@@ -2,6 +2,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from rich.markdown import Markdown
 from rich.console import Console
+from anthropic import Anthropic
 import os
 
 # Load environment variables
@@ -13,6 +14,7 @@ perplexity_client = OpenAI(
     api_key=os.getenv('PERPLEXITY_API_KEY'), 
     base_url="https://api.perplexity.ai"
 )
+claude_client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
 console = Console()
 
 def get_openai_completion(messages, model="gpt-4o"):
@@ -77,20 +79,54 @@ def get_perplexity_completion(query, model="sonar-pro", stream=False):
         print(f"Error making Perplexity API call: {str(e)}")
         return None
 
+def get_claude_completion(messages, model="claude-3-sonnet-20240229"):
+    """
+    Get completion from Claude models.
+    
+    Args:
+        messages (list or str): List of message dictionaries or a single string query
+        model (str): Claude model identifier
+        
+    Returns:
+        tuple: (updated_messages, success, response/error_message)
+    """
+    if isinstance(messages, str):
+        messages = [{"role": "user", "content": messages}]
+    
+    try:
+        response = claude_client.messages.create(
+            model=model,
+            max_tokens=1024,
+            messages=[msg for msg in messages if msg["role"] != "system"]
+        )
+        
+        ai_response = response.content[0].text
+        messages.append({"role": "assistant", "content": ai_response})
+        
+        return messages, True, ai_response
+        
+    except Exception as e:
+        return messages, False, str(e)
+
 def get_llm_completion(query, model="gpt-4o", stream=False):
     """
-    Unified interface for getting completions from either OpenAI or Perplexity models.
+    Unified interface for getting completions from OpenAI, Perplexity, or Claude models.
     
     Args:
         query (str or list): User query or message list
-        model (str): Model identifier (e.g., "gpt-4o", "sonar-pro", "o1-mini")
+        model (str): Model identifier (e.g., "gpt-4o", "sonar-pro", "claude-3-sonnet")
         stream (bool): Whether to stream the response (Perplexity only)
         
     Returns:
         tuple: (success, response/error_message)
     """
+    # Claude models
+    if model.startswith("claude"):
+        messages, success, response = get_claude_completion(query, model)
+        return success, response
+    
     # Perplexity models
-    if model.startswith("sonar"):
+    elif model.startswith("sonar"):
         response = get_perplexity_completion(query, model, stream)
         if response:
             if stream:
@@ -104,20 +140,23 @@ def get_llm_completion(query, model="gpt-4o", stream=False):
         return success, response
 
 def interactive_chat():
-    """Interactive chat interface supporting both OpenAI and Perplexity models."""
+    """Interactive chat interface supporting OpenAI, Perplexity, and Claude models."""
     models = {
         "1": "gpt-4o",
         "2": "o1-preview",
         "3": "o1-mini",
         "4": "sonar-pro",
-        "5": "sonar"
+        "5": "sonar",
+        "6": "claude-3-sonnet-20240229",
+        "7": "claude-3-opus-20240229",
+        "8": "claude-3-haiku-20240307"
     }
     
     print("\nAvailable models:")
     for key, model in models.items():
         print(f"{key}: {model}")
     
-    model_choice = input("\nChoose a model (1-5) or press Enter for default (gpt-4o): ").strip()
+    model_choice = input("\nChoose a model (1-8) or press Enter for default (gpt-4o): ").strip()
     selected_model = models.get(model_choice, "gpt-4o")
     print(f"\nUsing model: {selected_model}")
 
