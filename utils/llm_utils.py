@@ -48,22 +48,23 @@ def get_openai_completion(messages, model="gpt-4o"):
     except Exception as e:
         return messages, False, str(e)
 
-def get_perplexity_completion(query, model="sonar-pro", stream=False):
+def get_perplexity_completion(messages, model="sonar-pro", stream=False):
     """
     Get completion from Perplexity models.
     
     Args:
-        query (str): User query
+        messages (list or str): List of message dictionaries or a single string query
         model (str): Perplexity model name
         stream (bool): Whether to stream the response
         
     Returns:
-        Response object or None if error
+        tuple: (updated_messages, success, response/error_message)
     """
-    messages = [
-        {"role": "system", "content": "Be precise and concise."},
-        {"role": "user", "content": query}
-    ]
+    if isinstance(messages, str):
+        messages = [{"role": "user", "content": messages}]
+
+    # Filter out system messages as Perplexity might not handle them
+    messages = [msg for msg in messages if msg["role"] != "system"]
 
     params = {
         "model": model,
@@ -74,10 +75,14 @@ def get_perplexity_completion(query, model="sonar-pro", stream=False):
 
     try:
         response = perplexity_client.chat.completions.create(**params)
-        return response
+        if stream:
+            return messages, True, response
+        
+        ai_response = response.choices[0].message.content
+        messages.append({"role": "assistant", "content": ai_response})
+        return messages, True, ai_response
     except Exception as e:
-        print(f"Error making Perplexity API call: {str(e)}")
-        return None
+        return messages, False, str(e)
 
 def get_claude_completion(messages, model="claude-3-sonnet-20240229"):
     """
@@ -127,12 +132,8 @@ def get_llm_completion(query, model="gpt-4o", stream=False):
     
     # Perplexity models
     elif model.startswith("sonar"):
-        response = get_perplexity_completion(query, model, stream)
-        if response:
-            if stream:
-                return True, response
-            return True, response.choices[0].message.content
-        return False, "Failed to get Perplexity response"
+        messages, success, response = get_perplexity_completion(query, model, stream)
+        return success, response
     
     # OpenAI models
     else:

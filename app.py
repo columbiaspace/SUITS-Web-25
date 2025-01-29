@@ -117,9 +117,11 @@ def chat_message():
         data = request.get_json()
         message = data['message']
         model = data.get('model', 'gpt-4o')
+        messages = data.get('messages', [{'role': 'user', 'content': message}])
+        
         discord_logger.send_log(f'Processing chat message with model {model}', "info")
         
-        success, response = get_llm_completion(message, model=model)
+        success, response = get_llm_completion(messages, model=model)
         if success:
             discord_logger.send_log('Successfully generated AI response', "info")
             return jsonify({'response': response})
