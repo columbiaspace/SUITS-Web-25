@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lunar Lions Chat</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .chat-container {
@@ -80,7 +79,6 @@
     </div>
 
     <script>
-        const socket = io();
         const loginForm = document.getElementById('login-form');
         const loginSection = document.getElementById('login-section');
         const chatSection = document.getElementById('chat-section');
@@ -109,21 +107,31 @@
             }
         });
 
-        chatForm.addEventListener('submit', (e) => {
+        chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const message = messageInput.value.trim();
             if (message) {
                 appendMessage('user', message);
-                socket.emit('chat_message', {
-                    message: message,
-                    model: modelSelector.value
-                });
+                try {
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: message,
+                            model: modelSelector.value
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    appendMessage('ai', data.response);
+                } catch (error) {
+                    appendMessage('ai', 'Sorry, an error occurred while processing your request.');
+                    console.error('Error:', error);
+                }
                 messageInput.value = '';
             }
-        });
-
-        socket.on('ai_response', (response) => {
-            appendMessage('ai', response);
         });
 
         function appendMessage(sender, content) {

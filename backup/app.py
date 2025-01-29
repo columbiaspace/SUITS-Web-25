@@ -1,4 +1,5 @@
 from flask import Flask, render_template, jsonify, request
+from flask_socketio import SocketIO
 import json
 import random
 from datetime import datetime
@@ -8,6 +9,7 @@ from dotenv import load_dotenv
 import os
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 discord_logger = DiscordLogger()
 load_dotenv()
 
@@ -110,11 +112,18 @@ def get_location():
         discord_logger.send_log(error_msg, "error")
         return jsonify({"error": error_msg}), 500
 
-# Remove all socket events and replace with HTTP endpoint
-@app.route('/api/chat', methods=['POST'])
-def chat_message():
+# WebSocket events
+@socketio.on('connect')
+def handle_connect():
+    discord_logger.send_log('New WebSocket connection established', "info")
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    discord_logger.send_log('WebSocket connection closed', "info")
+
+@socketio.on('chat_message')
+def handle_chat_message(data):
     try:
-        data = request.get_json()
         message = data['message']
         model = data.get('model', 'gpt-4o')
         discord_logger.send_log(f'Processing chat message with model {model}', "info")
@@ -122,21 +131,23 @@ def chat_message():
         success, response = get_llm_completion(message, model=model)
         if success:
             discord_logger.send_log('Successfully generated AI response', "info")
-            return jsonify({'response': response})
+            socketio.emit('ai_response', response)
         else:
             error_msg = f"Failed to generate AI response: {response}"
             discord_logger.send_log(error_msg, "error")
-            return jsonify({'response': "Sorry, I encountered an error processing your request."}), 500
+            socketio.emit('ai_response', "Sorry, I encountered an error processing your request.")
     except Exception as e:
         error_msg = f"Error in chat message handling: {str(e)}"
         discord_logger.send_log(error_msg, "error")
-        return jsonify({'response': "An unexpected error occurred."}), 500
+        socketio.emit('ai_response', "An unexpected error occurred.")
 
 if __name__ == '__main__':
     try:
         discord_logger.send_log("Testing Discord connection...", "info")
         discord_logger.test_connection()
         discord_logger.send_log("Starting web server...", "info")
-        app.run(host='0.0.0.0', port=80)
+        socketio.run(app, 
+                    host='0.0.0.0',
+                    port=80)
     except Exception as e:
         discord_logger.send_log(f"Critical error starting server: {str(e)}", "error") 
