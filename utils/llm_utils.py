@@ -147,16 +147,17 @@ def interactive_chat():
         "3": "o1-mini",
         "4": "sonar-pro",
         "5": "sonar",
-        "6": "claude-3-sonnet-20240229",
-        "7": "claude-3-opus-20240229",
-        "8": "claude-3-haiku-20240307"
+        "6": "sonar-reasoning",
+        "7": "claude-3-sonnet-20240229",
+        "8": "claude-3-opus-20240229",
+        "9": "claude-3-haiku-20240307"
     }
     
     print("\nAvailable models:")
     for key, model in models.items():
         print(f"{key}: {model}")
     
-    model_choice = input("\nChoose a model (1-8) or press Enter for default (gpt-4o): ").strip()
+    model_choice = input("\nChoose a model (1-9) or press Enter for default (gpt-4o): ").strip()
     selected_model = models.get(model_choice, "gpt-4o")
     print(f"\nUsing model: {selected_model}")
 
