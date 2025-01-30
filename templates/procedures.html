@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .procedure-card {
+        transition: all 0.3s ease;
+    }
+    .procedure-card:hover {
+        transform: translateY(-5px);
+    }
+    .step-number {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+    .current-step {
+        background-color: #007bff;
+        color: white;
+    }
+    .completed-step {
+        background-color: #28a745;
+        color: white;
+    }
+    .priority-high {
+        border-left: 4px solid #dc3545;
+    }
+    .priority-medium {
+        border-left: 4px solid #ffc107;
+    }
+    .priority-low {
+        border-left: 4px solid #28a745;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-tasks text-primary"></i> EVA Procedures</h2>
+        <p>Step-by-step procedures and task management</p>
+        <p class="text-muted">Current procedure: {{ procedures_data.current_procedure.name }}</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Current Procedure -->
+    <div class="col-md-8">
+        <div class="card procedure-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-clipboard-list text-primary"></i>
+                    Current Procedure
+                </h5>
+                <span class="badge bg-primary">Step {{ procedures_data.current_procedure.step }} of {{ procedures_data.current_procedure.total_steps }}</span>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4>{{ procedures_data.current_procedure.name }}</h4>
+                    <div>
+                        <span class="badge bg-info">{{ procedures_data.current_procedure.status }}</span>
+                        <span class="badge bg-warning ms-2">
+                            <i class="fas fa-clock"></i>
+                            {{ procedures_data.current_procedure.time_remaining }} remaining
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Progress bar -->
+                <div class="progress mb-4" style="height: 20px;">
+                    {% with progress = (procedures_data.current_procedure.step / procedures_data.current_procedure.total_steps * 100)|round %}
+                    <div class="progress-bar" role="progressbar" style="width: {{ progress }}%">
+                        {{ progress }}%
+                    </div>
+                    {% endwith %}
+                </div>
+
+                <!-- Steps visualization -->
+                <div class="steps-container">
+                    {% for i in range(1, procedures_data.current_procedure.total_steps + 1) %}
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="step-number {% if i < procedures_data.current_procedure.step %}completed-step{% elif i == procedures_data.current_procedure.step %}current-step{% endif %}">
+                            {{ i }}
+                        </div>
+                        <div>Step {{ i }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completed Procedures -->
+    <div class="col-md-4">
+        <div class="card procedure-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-check-circle text-success"></i>
+                    Completed Procedures
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for procedure in procedures_data.completed_procedures %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ procedure.name }}</h6>
+                                <small class="text-muted">Duration: {{ procedure.duration }}</small>
+                            </div>
+                            <span class="badge bg-success">{{ procedure.status }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Procedures -->
+    <div class="col-md-12">
+        <div class="card procedure-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-alt text-info"></i>
+                    Upcoming Procedures
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    {% for procedure in procedures_data.upcoming_procedures %}
+                    <div class="col-md-6">
+                        <div class="card priority-{{ procedure.priority|lower }}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-1">{{ procedure.name }}</h5>
+                                    <span class="badge bg-{% if procedure.priority|lower == 'high' %}danger{% elif procedure.priority|lower == 'medium' %}warning{% else %}success{% endif %}">
+                                        {{ procedure.priority }}
+                                    </span>
+                                </div>
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-clock"></i>
+                                    Estimated duration: {{ procedure.estimated_duration }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateProcedures() {
+        fetch('/api/procedures')
+            .then(response => response.json())
+            .then(data => {
+                // Update the page with new data
+                location.reload(); // Simple refresh for now
+            });
+    }
+
+    // Initial update
+    updateProcedures();
+
+    // Poll for updates every 5 seconds
+    setInterval(updateProcedures, 5000);
+</script>
+{% endblock %} 

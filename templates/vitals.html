@@ -35,6 +35,7 @@
     <div class="col-12">
         <h2><i class="fas fa-heartbeat text-danger"></i> EVA Suit Vitals Monitor</h2>
         <p>Real-time monitoring of astronaut vital signs and suit telemetry</p>
+        <p class="text-muted">Last updated: <span id="last-updated">{{ vitals_data.last_updated }}</span></p>
     </div>
 </div>
 
@@ -46,7 +47,7 @@
                 <h5 class="mb-0"><i class="fas fa-heart text-danger"></i> Heart Rate</h5>
             </div>
             <div class="card-body text-center">
-                <div class="vital-value" id="heart-rate">--</div>
+                <div class="vital-value" id="heart-rate">{{ vitals_data.heart_rate }}</div>
                 <div class="vital-unit">BPM</div>
                 <canvas id="heart-rate-chart" height="100"></canvas>
             </div>
@@ -60,7 +61,7 @@
                 <h5 class="mb-0"><i class="fas fa-tachometer-alt text-info"></i> Blood Pressure</h5>
             </div>
             <div class="card-body text-center">
-                <div class="vital-value" id="blood-pressure">--/--</div>
+                <div class="vital-value" id="blood-pressure">{{ vitals_data.blood_pressure }}</div>
                 <div class="vital-unit">mmHg</div>
             </div>
         </div>
@@ -73,7 +74,7 @@
                 <h5 class="mb-0"><i class="fas fa-lungs text-primary"></i> O2 Saturation</h5>
             </div>
             <div class="card-body text-center">
-                <div class="vital-value" id="o2-saturation">--</div>
+                <div class="vital-value" id="o2-saturation">{{ vitals_data.o2_saturation }}</div>
                 <div class="vital-unit">%</div>
                 <canvas id="o2-chart" height="100"></canvas>
             </div>
@@ -87,7 +88,7 @@
                 <h5 class="mb-0"><i class="fas fa-compress-alt text-warning"></i> Suit Pressure</h5>
             </div>
             <div class="card-body text-center">
-                <div class="vital-value" id="suit-pressure">--</div>
+                <div class="vital-value" id="suit-pressure">{{ vitals_data.suit_pressure }}</div>
                 <div class="vital-unit">PSI</div>
                 <canvas id="pressure-chart" height="100"></canvas>
             </div>
@@ -101,10 +102,10 @@
                 <h5 class="mb-0"><i class="fas fa-battery-three-quarters text-success"></i> Battery Level</h5>
             </div>
             <div class="card-body text-center">
-                <div class="vital-value" id="battery-level">--</div>
+                <div class="vital-value" id="battery-level">{{ vitals_data.battery_level }}</div>
                 <div class="vital-unit">%</div>
                 <div class="progress mt-3">
-                    <div class="progress-bar bg-success" id="battery-progress" role="progressbar" style="width: 0%"></div>
+                    <div class="progress-bar bg-success" id="battery-progress" role="progressbar" style="width: {{ vitals_data.battery_level }}%"></div>
                 </div>
             </div>
         </div>
@@ -117,9 +118,48 @@
                 <h5 class="mb-0"><i class="fas fa-wind text-danger"></i> CO2 Level</h5>
             </div>
             <div class="card-body text-center">
-                <div class="vital-value" id="co2-level">--</div>
+                <div class="vital-value" id="co2-level">{{ vitals_data.co2_level }}</div>
                 <div class="vital-unit">mmHg</div>
                 <canvas id="co2-chart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Temperature -->
+    <div class="col-md-4">
+        <div class="card vital-card" id="temp-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-thermometer-half text-warning"></i> Temperature</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="vital-value" id="temperature">{{ vitals_data.temperature }}</div>
+                <div class="vital-unit">°F</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Humidity -->
+    <div class="col-md-4">
+        <div class="card vital-card" id="humidity-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-tint text-info"></i> Humidity</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="vital-value" id="humidity">{{ vitals_data.humidity }}</div>
+                <div class="vital-unit">%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fan Speed -->
+    <div class="col-md-4">
+        <div class="card vital-card" id="fan-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-fan text-primary"></i> Fan Speed</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="vital-value" id="fan-speed">{{ vitals_data.fan_speed }}</div>
+                <div class="vital-unit">RPM</div>
             </div>
         </div>
     </div>
@@ -167,57 +207,63 @@
         chart.update();
     }
 
-    // Socket.IO updates
-    socket.on('vitals_update', (data) => {
-        // Update values
-        document.getElementById('heart-rate').textContent = data.heart_rate;
-        document.getElementById('blood-pressure').textContent = data.blood_pressure;
-        document.getElementById('o2-saturation').textContent = data.o2_saturation;
-        document.getElementById('suit-pressure').textContent = data.suit_pressure;
-        document.getElementById('battery-level').textContent = data.battery_level;
-        document.getElementById('co2-level').textContent = data.co2_level;
-
-        // Update battery progress bar
-        document.getElementById('battery-progress').style.width = `${data.battery_level}%`;
-
-        // Update charts
-        updateChart(charts.heartRate, data.heart_rate);
-        updateChart(charts.o2, data.o2_saturation);
-        updateChart(charts.pressure, data.suit_pressure);
-        updateChart(charts.co2, data.co2_level);
-
-        // Check for warnings
-        const cards = {
-            'heart-rate-card': data.heart_rate < 60 || data.heart_rate > 100,
-            'blood-pressure-card': false, // Add your own logic
-            'o2-card': data.o2_saturation < 95,
-            'pressure-card': data.suit_pressure < 3.8 || data.suit_pressure > 4.2,
-            'battery-card': data.battery_level < 20,
-            'co2-card': data.co2_level > 3
-        };
-
-        // Apply warning classes
-        for (const [id, warning] of Object.entries(cards)) {
-            const card = document.getElementById(id);
-            card.classList.toggle('warning', warning);
-            card.classList.toggle('critical', warning && (
-                data.battery_level < 10 ||
-                data.o2_saturation < 90 ||
-                data.co2_level > 5
-            ));
-        }
-    });
-
-    // Request initial data
-    fetch('/api/vitals')
-        .then(response => response.json())
-        .then(data => socket.emit('vitals_update', data));
-
-    // Poll for updates every second (simulating real-time updates)
-    setInterval(() => {
+    function updateVitals() {
         fetch('/api/vitals')
             .then(response => response.json())
-            .then(data => socket.emit('vitals_update', data));
-    }, 1000);
+            .then(data => {
+                // Update values
+                document.getElementById('heart-rate').textContent = data.heart_rate;
+                document.getElementById('blood-pressure').textContent = data.blood_pressure;
+                document.getElementById('o2-saturation').textContent = data.o2_saturation;
+                document.getElementById('suit-pressure').textContent = data.suit_pressure;
+                document.getElementById('battery-level').textContent = data.battery_level;
+                document.getElementById('co2-level').textContent = data.co2_level;
+                document.getElementById('temperature').textContent = data.temperature;
+                document.getElementById('humidity').textContent = data.humidity;
+                document.getElementById('fan-speed').textContent = data.fan_speed;
+                document.getElementById('last-updated').textContent = data.last_updated;
+
+                // Update battery progress bar
+                document.getElementById('battery-progress').style.width = `${data.battery_level}%`;
+
+                // Update charts
+                updateChart(charts.heartRate, data.heart_rate);
+                updateChart(charts.o2, data.o2_saturation);
+                updateChart(charts.pressure, data.suit_pressure);
+                updateChart(charts.co2, data.co2_level);
+
+                // Check for warnings
+                const cards = {
+                    'heart-rate-card': data.heart_rate < 60 || data.heart_rate > 100,
+                    'blood-pressure-card': false, // Add your own logic
+                    'o2-card': data.o2_saturation < 95,
+                    'pressure-card': data.suit_pressure < 3.8 || data.suit_pressure > 4.2,
+                    'battery-card': data.battery_level < 20,
+                    'co2-card': data.co2_level > 3,
+                    'temp-card': data.temperature < 97 || data.temperature > 100,
+                    'humidity-card': data.humidity < 30 || data.humidity > 70,
+                    'fan-card': data.fan_speed < 1800
+                };
+
+                // Apply warning classes
+                for (const [id, warning] of Object.entries(cards)) {
+                    const card = document.getElementById(id);
+                    card.classList.toggle('warning', warning);
+                    card.classList.toggle('critical', warning && (
+                        data.battery_level < 10 ||
+                        data.o2_saturation < 90 ||
+                        data.co2_level > 5 ||
+                        data.temperature > 101 ||
+                        data.temperature < 96
+                    ));
+                }
+            });
+    }
+
+    // Initial update
+    updateVitals();
+
+    // Poll for updates every second
+    setInterval(updateVitals, 1000);
 </script>
 {% endblock %} 

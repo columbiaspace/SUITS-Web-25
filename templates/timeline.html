@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .timeline-card {
+        transition: all 0.3s ease;
+    }
+    .timeline-card:hover {
+        transform: translateY(-5px);
+    }
+    .mission-time {
+        font-size: 3rem;
+        font-weight: bold;
+        text-align: center;
+        color: #007bff;
+    }
+    .remaining-time {
+        font-size: 1.5rem;
+        text-align: center;
+        color: #6c757d;
+    }
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        width: 2px;
+        background-color: #e9ecef;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        margin-left: -1px;
+    }
+    .timeline-item {
+        margin-bottom: 30px;
+        position: relative;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #007bff;
+        background-color: #fff;
+        border-radius: 50%;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 15px;
+    }
+    .timeline-item.completed::before {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    .timeline-item.upcoming::before {
+        background-color: #fff;
+        border-color: #ffc107;
+    }
+    .timeline-content {
+        width: calc(50% - 30px);
+        padding: 15px;
+        background: #fff;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .timeline-item:nth-child(odd) .timeline-content {
+        margin-left: auto;
+    }
+    .timeline-time {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #007bff;
+    }
+    .timeline-event {
+        font-size: 1rem;
+        margin: 5px 0;
+    }
+    .timeline-status {
+        font-size: 0.875rem;
+    }
+    .status-completed {
+        color: #28a745;
+    }
+    .status-upcoming {
+        color: #ffc107;
+    }
+    .status-scheduled {
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-clock text-primary"></i> Mission Timeline</h2>
+        <p>Real-time mission progress and schedule tracking</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Mission Clock -->
+    <div class="col-md-6">
+        <div class="card timeline-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-stopwatch text-primary"></i>
+                    Mission Clock
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mission-time" id="mission-time">{{ timeline_data.mission_time }}</div>
+                <div class="text-center text-muted mb-3">Mission Time</div>
+                <div class="remaining-time" id="remaining-time">{{ timeline_data.remaining_time }}</div>
+                <div class="text-center text-muted">Remaining Time</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="col-md-6">
+        <div class="card timeline-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie text-success"></i>
+                    Mission Progress
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <h3 class="text-success">
+                            {% with completed = timeline_data.events|selectattr('status', 'equalto', 'Completed')|list %}
+                            {{ completed|length }}
+                            {% endwith %}
+                        </h3>
+                        <div class="text-muted">Completed</div>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="text-warning">
+                            {% with upcoming = timeline_data.events|selectattr('status', 'equalto', 'Upcoming')|list %}
+                            {{ upcoming|length }}
+                            {% endwith %}
+                        </h3>
+                        <div class="text-muted">Upcoming</div>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="text-secondary">
+                            {% with scheduled = timeline_data.events|selectattr('status', 'equalto', 'Scheduled')|list %}
+                            {{ scheduled|length }}
+                            {% endwith %}
+                        </h3>
+                        <div class="text-muted">Scheduled</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="col-md-12">
+        <div class="card timeline-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-stream text-info"></i>
+                    Event Timeline
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% for event in timeline_data.events %}
+                    <div class="timeline-item {{ event.status|lower }}">
+                        <div class="timeline-content">
+                            <div class="timeline-time">{{ event.time }}</div>
+                            <div class="timeline-event">{{ event.event }}</div>
+                            <div class="timeline-status status-{{ event.status|lower }}">
+                                <i class="fas fa-{% if event.status == 'Completed' %}check-circle{% elif event.status == 'Upcoming' %}clock{% else %}calendar{% endif %}"></i>
+                                {{ event.status }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateTimeline() {
+        fetch('/api/timeline')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('mission-time').textContent = data.mission_time;
+                document.getElementById('remaining-time').textContent = data.remaining_time;
+            });
+    }
+
+    // Initial update
+    updateTimeline();
+
+    // Poll for updates every second
+    setInterval(updateTimeline, 1000);
+</script>
+{% endblock %} 

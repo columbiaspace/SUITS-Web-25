@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map {
+        height: 500px;
+        width: 100%;
+        border-radius: 8px;
+    }
+    .location-card {
+        transition: all 0.3s ease;
+    }
+    .location-card:hover {
+        transform: translateY(-5px);
+    }
+    .location-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    .location-unit {
+        font-size: 0.9rem;
+        color: #888;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-map-marker-alt text-danger"></i> EVA Navigation System</h2>
+        <p>Real-time location tracking and navigation assistance</p>
+        <p class="text-muted">Last updated: <span id="last-updated">{{ location_data.last_updated }}</span></p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-map text-primary"></i> Location Map</h5>
+            </div>
+            <div class="card-body">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="row g-4">
+            <!-- Current Position -->
+            <div class="col-12">
+                <div class="card location-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-crosshairs text-info"></i> Current Position</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="text-muted">Latitude</label>
+                            <div class="location-value" id="latitude">{{ location_data.latitude }}</div>
+                            <div class="location-unit">degrees N</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted">Longitude</label>
+                            <div class="location-value" id="longitude">{{ location_data.longitude }}</div>
+                            <div class="location-unit">degrees W</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted">Heading</label>
+                            <div class="location-value" id="heading">{{ location_data.heading }}</div>
+                            <div class="location-unit">degrees</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Movement Data -->
+            <div class="col-12">
+                <div class="card location-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-tachometer-alt text-warning"></i> Movement Data</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="text-muted">Altitude</label>
+                            <div class="location-value" id="altitude">{{ location_data.altitude }}</div>
+                            <div class="location-unit">meters</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted">Speed</label>
+                            <div class="location-value" id="speed">{{ location_data.speed }}</div>
+                            <div class="location-unit">m/s</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Waypoints -->
+            <div class="col-12">
+                <div class="card location-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-map-signs text-success"></i> Waypoints</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group" id="waypoints-list">
+                            {% for waypoint in location_data.waypoints %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">{{ waypoint.name }}</h6>
+                                        <small class="text-muted">{{ waypoint.lat }}, {{ waypoint.lng }}</small>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="centerMapOn({{ waypoint.lat }}, {{ waypoint.lng }})">
+                                        <i class="fas fa-crosshairs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Initialize map with dark theme
+    const map = L.map('map').setView([{{ location_data.latitude }}, {{ location_data.longitude }}], 18);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap contributors, © CARTO',
+        maxZoom: 20
+    }).addTo(map);
+
+    // Create custom icon for current position
+    const positionIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='background-color: #105bd8; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;'></div>",
+        iconSize: [15, 15],
+        iconAnchor: [7, 7]
+    });
+
+    // Add current position marker
+    const positionMarker = L.marker([{{ location_data.latitude }}, {{ location_data.longitude }}], {
+        icon: positionIcon
+    }).addTo(map);
+
+    // Add accuracy circle
+    const accuracyCircle = L.circle([{{ location_data.latitude }}, {{ location_data.longitude }}], {
+        color: '#105bd8',
+        fillColor: '#105bd8',
+        fillOpacity: 0.1,
+        radius: 10,
+        weight: 1
+    }).addTo(map);
+
+    // Add waypoint markers
+    const waypoints = {{ location_data.waypoints|tojson|safe }};
+    const waypointIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='background-color: #28a745; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;'></div>",
+        iconSize: [12, 12],
+        iconAnchor: [6, 6]
+    });
+
+    waypoints.forEach(waypoint => {
+        L.marker([waypoint.lat, waypoint.lng], {
+            icon: waypointIcon
+        })
+        .bindPopup(waypoint.name)
+        .addTo(map);
+    });
+
+    function centerMapOn(lat, lng) {
+        map.setView([lat, lng], 18, {
+            animate: true,
+            duration: 1
+        });
+    }
+
+    function updateLocation() {
+        fetch('/api/location')
+            .then(response => response.json())
+            .then(data => {
+                // Update text values
+                document.getElementById('latitude').textContent = data.latitude.toFixed(4);
+                document.getElementById('longitude').textContent = data.longitude.toFixed(4);
+                document.getElementById('heading').textContent = data.heading;
+                document.getElementById('altitude').textContent = data.altitude.toFixed(2);
+                document.getElementById('speed').textContent = data.speed.toFixed(2);
+                document.getElementById('last-updated').textContent = data.last_updated;
+
+                // Update map markers
+                const newLatLng = [data.latitude, data.longitude];
+                positionMarker.setLatLng(newLatLng);
+                accuracyCircle.setLatLng(newLatLng);
+                
+                // Optional: keep map centered on current position
+                map.panTo(newLatLng, {
+                    animate: true,
+                    duration: 1
+                });
+            });
+    }
+
+    // Initial update
+    updateLocation();
+
+    // Poll for updates every second
+    setInterval(updateLocation, 1000);
+</script>
+{% endblock %} 

@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .alert-card {
+        transition: all 0.3s ease;
+    }
+    .alert-card:hover {
+        transform: translateY(-5px);
+    }
+    .alert-item {
+        border-left: 4px solid transparent;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background-color: rgba(0, 0, 0, 0.02);
+        border-radius: 0.25rem;
+    }
+    .alert-item:last-child {
+        margin-bottom: 0;
+    }
+    .alert-item.critical {
+        border-left-color: #dc3545;
+        background-color: rgba(220, 53, 69, 0.05);
+    }
+    .alert-item.warning {
+        border-left-color: #ffc107;
+        background-color: rgba(255, 193, 7, 0.05);
+    }
+    .alert-item.notification {
+        border-left-color: #0dcaf0;
+        background-color: rgba(13, 202, 240, 0.05);
+    }
+    .alert-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+    .alert-icon.critical {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+    .alert-icon.warning {
+        background-color: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+    }
+    .alert-icon.notification {
+        background-color: rgba(13, 202, 240, 0.1);
+        color: #0dcaf0;
+    }
+    .alert-time {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    .alert-message {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    .alert-type {
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-exclamation-triangle text-warning"></i> Alert System</h2>
+        <p>Real-time monitoring and alert management</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Critical Alerts -->
+    {% if alerts_data.critical %}
+    <div class="col-md-12">
+        <div class="card alert-card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Critical Alerts
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for alert in alerts_data.critical %}
+                <div class="alert-item critical">
+                    <div class="d-flex align-items-start">
+                        <div class="alert-icon critical">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="alert-type text-danger">{{ alert.type }}</div>
+                            <div class="alert-message">{{ alert.message }}</div>
+                            <div class="alert-time">{{ alert.timestamp }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Warnings -->
+    {% if alerts_data.warnings %}
+    <div class="col-md-12">
+        <div class="card alert-card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Warnings
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for alert in alerts_data.warnings %}
+                <div class="alert-item warning">
+                    <div class="d-flex align-items-start">
+                        <div class="alert-icon warning">
+                            <i class="fas fa-exclamation"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="alert-type text-warning">{{ alert.type }}</div>
+                            <div class="alert-message">{{ alert.message }}</div>
+                            <div class="alert-time">{{ alert.timestamp }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Notifications -->
+    {% if alerts_data.notifications %}
+    <div class="col-md-12">
+        <div class="card alert-card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle"></i>
+                    Notifications
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for alert in alerts_data.notifications %}
+                <div class="alert-item notification">
+                    <div class="d-flex align-items-start">
+                        <div class="alert-icon notification">
+                            <i class="fas fa-info"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="alert-type text-info">{{ alert.type }}</div>
+                            <div class="alert-message">{{ alert.message }}</div>
+                            <div class="alert-time">{{ alert.timestamp }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not alerts_data.critical and not alerts_data.warnings and not alerts_data.notifications %}
+    <div class="col-12">
+        <div class="card alert-card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                <h4>All Systems Normal</h4>
+                <p class="text-muted mb-0">No active alerts or notifications at this time.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateAlerts() {
+        fetch('/api/alerts')
+            .then(response => response.json())
+            .then(data => {
+                // Update the page with new data
+                location.reload(); // Simple refresh for now
+            });
+    }
+
+    // Poll for updates every second for critical alerts
+    setInterval(updateAlerts, 1000);
+
+    // Play sound for critical alerts
+    {% if alerts_data.critical %}
+    const alertSound = new Audio('/static/alert.mp3');
+    alertSound.play();
+    {% endif %}
+</script>
+{% endblock %} 

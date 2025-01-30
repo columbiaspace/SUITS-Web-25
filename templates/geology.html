@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .geology-card {
+        transition: all 0.3s ease;
+    }
+    .geology-card:hover {
+        transform: translateY(-5px);
+    }
+    .sample-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    .sample-unit {
+        font-size: 0.9rem;
+        color: #888;
+    }
+    .status-analyzed {
+        border-left: 4px solid #28a745;
+    }
+    .status-stored {
+        border-left: 4px solid #ffc107;
+    }
+    .status-analysis {
+        border-left: 4px solid #17a2b8;
+    }
+    .equipment-status {
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        margin-bottom: 0.5rem;
+    }
+    .status-operational {
+        background-color: rgba(40, 167, 69, 0.1);
+        border: 1px solid rgba(40, 167, 69, 0.2);
+    }
+    .status-warning {
+        background-color: rgba(255, 193, 7, 0.1);
+        border: 1px solid rgba(255, 193, 7, 0.2);
+    }
+    .status-error {
+        background-color: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-microscope text-primary"></i> Geology Tools</h2>
+        <p>Sample collection and analysis management</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Current Sample -->
+    <div class="col-md-6">
+        <div class="card geology-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-flask text-info"></i>
+                    Current Sample
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4>Sample ID: {{ geology_data.current_sample.id }}</h4>
+                    <span class="badge bg-primary">Active Collection</span>
+                </div>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="text-muted">Type</label>
+                        <div class="sample-value">{{ geology_data.current_sample.type }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted">Mass</label>
+                        <div class="sample-value">{{ geology_data.current_sample.mass }} <span class="sample-unit">kg</span></div>
+                    </div>
+                    <div class="col-12">
+                        <label class="text-muted">Collection Location</label>
+                        <div class="sample-value">
+                            {{ geology_data.current_sample.location.lat }}, {{ geology_data.current_sample.location.lng }}
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="text-muted">Collection Time</label>
+                        <div class="sample-value">{{ geology_data.current_sample.collection_time }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Equipment Status -->
+    <div class="col-md-6">
+        <div class="card geology-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tools text-warning"></i>
+                    Equipment Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="equipment-status status-{% if geology_data.equipment_status.xrf_device|lower == 'operational' %}operational{% else %}warning{% endif %}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">XRF Device</h6>
+                            <p class="mb-0">Status: {{ geology_data.equipment_status.xrf_device }}</p>
+                        </div>
+                        <i class="fas fa-check-circle text-success fa-2x"></i>
+                    </div>
+                </div>
+
+                <div class="equipment-status status-{% if geology_data.equipment_status.sample_bags > 5 %}operational{% else %}warning{% endif %}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">Sample Bags</h6>
+                            <p class="mb-0">Available: {{ geology_data.equipment_status.sample_bags }}</p>
+                        </div>
+                        <i class="fas fa-shopping-bag text-{% if geology_data.equipment_status.sample_bags > 5 %}success{% else %}warning{% endif %} fa-2x"></i>
+                    </div>
+                </div>
+
+                <div class="equipment-status status-{% if geology_data.equipment_status.collection_tools == 'All Available' %}operational{% else %}warning{% endif %}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">Collection Tools</h6>
+                            <p class="mb-0">Status: {{ geology_data.equipment_status.collection_tools }}</p>
+                        </div>
+                        <i class="fas fa-hammer text-success fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collected Samples -->
+    <div class="col-md-12">
+        <div class="card geology-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-vials text-success"></i>
+                    Collected Samples
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    {% for sample in geology_data.collected_samples %}
+                    <div class="col-md-4">
+                        <div class="card status-{{ sample.status|lower }}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">{{ sample.id }}</h5>
+                                    <span class="badge bg-{% if sample.status|lower == 'analyzed' %}success{% elif sample.status|lower == 'stored' %}warning{% else %}info{% endif %}">
+                                        {{ sample.status }}
+                                    </span>
+                                </div>
+                                <p class="mb-0">
+                                    <i class="fas fa-mountain text-muted"></i>
+                                    Type: {{ sample.type }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateGeologyData() {
+        fetch('/api/geology')
+            .then(response => response.json())
+            .then(data => {
+                // Update the page with new data
+                location.reload(); // Simple refresh for now
+            });
+    }
+
+    // Initial update
+    updateGeologyData();
+
+    // Poll for updates every 5 seconds
+    setInterval(updateGeologyData, 5000);
+</script>
+{% endblock %} 
